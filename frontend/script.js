@@ -101,24 +101,294 @@ async function generateTests() {
 
     const cypressCodePrompt = gerarPromptCypress(scenariosResponse);
     const cypressResponse = await callBackend(cypressCodePrompt);
-    transformCardToAccordion('Cypress Code', '```javascript\n' + cypressResponse + '\n```');
+    transformCardToAccordion('Cypress Code', cypressResponse);
 }
 
-function gerarPromptUserStory(urls, components, additionalInfo) {
-    return `Com esses dados de url, componentes e informações adicionais sobre o meu sistema gere um título de história de usuário.\n\nURL: ${urls.join(', ')}\n\nComponentes:\n${components.map(c => `- ${c.type}: ${c.selector}`).join('\n')}\n\nInformação adicional:\n${additionalInfo}\n`;
-}
+const gerarPromptUserStory = (urls, components, additionalInfo) => {
+    return `
+Com base nas informações abaixo, gere uma User Story no padrão ágil.
 
-function gerarPromptAcceptance(storyResponse) {
-    return `Utilizando esses critérios de aceite como base, crie os critérios de aceite para os dados enviados anteriormente:\n\nHistória de usuário:\n${storyResponse}\n`;
-}
+URLs:
+${urls.join(', ')}
 
-function gerarPromptScenarios(storyResponse, acceptanceResponse) {
-    return `Utilizando os critérios de aceite abaixo, gere cenários de testes BDD para o sistema descrito:\n\nHistória de usuário:\n${storyResponse}\n\nCritérios de aceite:\n${acceptanceResponse}\n`;
-}
+Componentes:
+${components.map(c => `- ${c.tipo}: ${c.seletor}`).join('\n')}
 
-function gerarPromptCypress(scenariosResponse) {
-    return `Utilizando esses cenários de teste:\n\n${scenariosResponse}\n\nGere os testes automatizados em Cypress utilizando PageObject e boas práticas de DRY.`;
+Informações adicionais:
+${additionalInfo}
+
+Exemplos de User Story:
+- US-20: I as a Quality Manager would like to create a new evaluation criteria matrix for the improvement opportunities so that I can analyze and evaluate the results according to the company's needs.
+- US-17: I as the quality manager would like to edit the information, responsible parties and deadlines of the registered improvement opportunity/change so that I can update or adjust necessary data.
+- US-02: As a company Employee, I would like to register an improvement opportunity, so I can analyze and evaluate its implementation needs.
+`;
+};
+
+
+const gerarPromptAcceptance = (storyResponse) => {
+    return `
+Com base na seguinte User Story, gere os Acceptance Criteria necessários.
+
+User Story:
+${storyResponse}
+
+Exemplos de Acceptance Criteria:
+It should be possible to change the evaluation criteria matrix dimension on the improvement opportunities configuration
+It should be possible to choose the matrix dimension between
+3x3
+4x4
+5x5
+It should be possible to edit the label quadrants
+It should be possible to edit the label of the probability and impact axes
+It should be possible to change the result of each quadrant by clicking on it
+It should not be possible to change the matrix dimension after the improvement opportunities is configured
+It should have and alert saying that is not possible to edit the matrix dimension after the improvement opportunities is configured
+It should hide if the user presses the 'X'
+It should be possible to drag only the evaluation criteria matrix while in mobile or tablet
+It should have an info icon saying what is possible to edit on the evaluation criteria matrix
+In mobile it should be only a subtitle
+
+From the details screen it should be possible:
+Edit the registration information
+information of the improvement opportunity/change
+Responsible for the steps and deadlines if still in progress
+
+Description of the improvement opportunity
+Text fields it should have a 500 character limit
+Process
+Organizational Unit
+Origin
+Internal Environment
+External Environment
+Type of improvement opportunity
+Commercial
+Technological
+Operational
+Environmental
+Economic
+Compliance
+Health and Safety
+It should be possible to insert an attachment
+Improvement Opportunity Code
+It should be limited to 10 characters
+It should suggest an automatic code consisting of the prefix OP followed by 4 sequential numbers (e.g. OP0001, OP0002)
+It should be possible to describe change management information
+Text fields should have a 500 character limit
+Expected results
+Maintaining the integrity of the QMS
+Resource availability
+Allocation/Reallocation of authorities and responsibilities
+It should be required to select the desired result quadrant
+It should be necessary to select the person responsible for:
+Drawing up the action plan
+Evaluation of effectiveness
+It should be necessary to inform the deadline for the demands
+The Deadline should be in quantity of days
+It should have 30 days by default
+It should be redirected to the tasks screen when I save the improvement opportunity
+It should return the success toast
+`;
+};
+
+const gerarPromptScenarios = (storyResponse, acceptanceResponse) => {
+    return `
+Com base na User Story e nos critérios de aceite abaixo, gere os cenários de teste em Gherkin (BDD).
+
+User Story:
+${storyResponse}
+
+Acceptance Criteria:
+${acceptanceResponse}
+
+Exemplos de Cenários BDD:
+Scenario 1:
+GIVEN I am setting up evaluation criteria
+WHEN I change the matrix dimension to 5x5
+AND I complete the configuration
+THEN I should see opportunity for improvement with the new matrix dimension
+
+Scenario 2:
+GIVEN I am configuring a new improvement opportunity
+WHEN I change the matrix dimension to 4x4
+THEN I complete the configuration
+AND I should see opportunities for improvement with the new matrix dimension
+
+Scenario 3:
+GIVEN that I am configuring a new improvement opportunity
+WHEN I view the matrix dimension
+THEN I should see that 3x3 matrix pattern
+AND I complete the configuration
+AND I should see improvement opportunities with the new matrix dimension
+
+Scenario 4:
+GIVEN that I am configuring evaluation criteria
+WHEN I edit the quadrant labels
+AND I edit the probability and impact axis labels
+THEN I should see opportunity for improvement with the new updated quadrant and axis labels
+
+Scenario 5:
+GIVEN I am setting up an improvement opportunity
+WHEN I close the matrix editing alert
+AND I access the evaluation criteria screen again
+THEN I see the alert again
+
+Scenario 6:
+GIVEN that I am editing an improvement opportunity
+WHEN I try to edit evaluation criteria matrix
+THEN I see that it is not possible to change the matrix dimension
+
+Scenario 1:
+GIVEN that I have an opportunity created
+AND I go to the edit screen of the opportunity
+WHEN I edit all the fields in my opportunity
+AND save all the changes
+THEN I should go to the details screen
+AND I should see my edited opportunity information
+
+Scenario 2:
+GIVEN I have an opportunity created at the planning step
+WHEN I edit the responsible and deadline of my and action plan and effectiveness AND I am in the task screen
+THEN  I should see this new data on the task screen
+
+Scenario 3:
+GIVEN that I have an opportunity created in the implementation step
+AND I go to edit screen
+WHEN  I try to edit the responsible and deadline of my action plan
+THEN I should see that it is not possible
+
+Scenario 4:
+GIVEN that I have an opportunity created in the effectiveness step
+AND I am in the edit screen
+WHEN I edit the person responsible and deadline for my effectiveness
+AND I go to the task screen
+THEN I should see this new data on the task screen
+
+Scenario 5:
+GIVEN that I have a finalised opportunity
+AND I go to the edit screen
+WHEN I try to edit the opportunity responsible step
+THEN I should not see the step
+
+Scenario 6:
+GIVEN that I have an opportunity created in the effectiveness step
+AND I am in the edit screen
+WHEN I edit the person responsible and deadline for my effectiveness
+AND I go to the task screen
+THEN I should see this new data on the task screen
+
+Scenario 7:
+GIVEN that I have a finalised opportunity
+AND I go to the edit screen
+WHEN I try to edit the opportunity responsible step
+THEN I should not see the step
+
+Scenario 8:
+GIVEN I have an opportunity created in the approve action plan step
+AND I'm on the edit screen
+WHEN I edit the responsible and the deadline for my action plan approve step
+AND I go to the tasks screen
+THEN I should see this new data on the task screen
+
+Scenario 9:
+GIVEN that I'm on the edit opportunity screen
+WHEN I clear a required field
+THEN I should see the save button disabled in all steps
+AND the next button should always be enabled
+Scenario 1:
+GIVEN that I am on the tasks screen
+AND I go to the new improvement opportunity page
+WHEN I fill in all the required fields of the information step
+AND I see the automatic code consisting of the prefix OP followed by four numbers
+AND I evaluate the opportunity
+AND select the person responsible for the elaboration and effectiveness evaluation
+AND finalize the registration
+THEN the system must show a success message
+AND I should be redirected to the tasks screen
+ 
+Scenario 2:
+GIVEN that I already have an improvement opportunity created
+WHEN I go to the new improvement opportunity page
+THEN I should see the automatic sequential code
+ 
+Scenario 3:
+GIVEN I am on the new improvement opportunity page
+WHEN I fill in all the required fields
+AND add an attachment
+AND finalize registration
+THEN I should see the task created to elaborate the action plan
+ 
+Scenario 4:
+GIVEN that I am on the tasks screen
+AND there is no task registered
+WHEN I try to filter to return some task
+THEN I should see the message that I have no tasks.
+ 
+Scenario 5:
+GIVEN I am on the task screen
+AND I have tasks registered
+WHEN click to return tasks from other users
+THEN I should see the message that No results found
+
+Scenario 6:
+GIVEN I am on the “New opportunity” screen in the responsible stage
+AND I add another user as the validator
+WHEN I finish registering the new opportunity
+THEN I should see a success toast with a link button in it
+AND when I click on the link button I should be redirected to the details screen.
+
+Scenario 7:
+GIVEN that I'm on the new opportunity screen
+AND I fill in all the required fields
+WHEN I clear a required field
+THEN I should see the next steps disabled
+AND the next button disabled
+`;
+};
+
+const gerarPromptCypress = (storyResponse, acceptanceResponse, scenariosResponse) => {
+  return `
+Com base nas informações abaixo, gere um arquivo .zip contendo a pasta Cypress completa e funcional para realizar download, pronta para ser executada no projeto utilizando pageObject e DRY.
+
+A estrutura da pasta Cypress deve conter:
+- cypress/
+  ├── e2e/
+  ├── fixtures/
+  ├── pages/
+  ├── support/
+- cypress.config.js
+A resposta deve ser em formato json, contendo o seguinte formato:
+{
+  "cypress": {
+    "e2e": {
+      "specs": [
+        {
+          "name": "test_spec.cy.js",
+          "content": "Conteúdo do arquivo de teste"
+        }
+      ]
+    },
+    "fixtures": [],
+    "pages": [
+        {
+          "name": "test_spec.cy.js",
+          "content": "Conteúdo do arquivo de teste"
+        }],
+    "support": []
+  },
+  "cypress.config.js": "Conteúdo do arquivo de configuração"
 }
+User Story:
+${storyResponse}
+
+Acceptance Criteria:
+${acceptanceResponse}
+
+Test Scenarios:
+${scenariosResponse}
+
+Exemplos de testes Cypress:
+`;
+};
 
 addUrl();
 addComponent();
