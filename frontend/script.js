@@ -18,6 +18,59 @@ function addComponent() {
     document.getElementById('componentContainer').appendChild(div);
 }
 
+function extractJson(text) {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) {
+        throw new Error('JSON não encontrado na resposta.');
+    }
+    const jsonString = text.substring(start, end + 1);
+    return JSON.parse(jsonString);
+}
+
+function downloadCypressZip(responseText) {
+    let data;
+    try {
+        data = extractJson(responseText);
+    } catch (error) {
+        alert('Erro ao extrair JSON: ' + error.message);
+        return;
+    }
+
+    const zip = new JSZip();
+
+    const cypress = zip.folder('cypress');
+    const e2e = cypress.folder('e2e');
+    const fixtures = cypress.folder('fixtures');
+    const pages = cypress.folder('pages');
+    const support = cypress.folder('support');
+
+    (data.cypress.e2e || []).forEach(file => {
+        e2e.file(file.name, file.content);
+    });
+
+    (data.cypress.pages || []).forEach(file => {
+        pages.file(file.name, file.content);
+    });
+
+    (data.cypress.fixtures || []).forEach(file => {
+        fixtures.file(file.name, file.content);
+    });
+
+    (data.cypress.support || []).forEach(file => {
+        support.file(file.name, file.content);
+    });
+
+    zip.file('cypress.config.js', data['cypress.config.js']);
+
+    zip.generateAsync({ type: "blob" }).then(content => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "cypress-tests.zip";
+        link.click();
+    });
+}
+
 function createLoadingCard(title) {
     const id = title.replace(/\s/g, '');
     const accordion = document.getElementById('resultsAccordion');
@@ -99,9 +152,15 @@ async function generateTests() {
     const scenariosResponse = await callBackend(testScenariosPrompt);
     transformCardToAccordion('Test Scenarios', scenariosResponse);
 
-    const cypressCodePrompt = gerarPromptCypress(scenariosResponse);
+    const cypressCodePrompt = gerarPromptCypress(storyResponse, acceptanceResponse, scenariosResponse, urls, components, additionalInfo);
     const cypressResponse = await callBackend(cypressCodePrompt);
-    transformCardToAccordion('Cypress Code', cypressResponse);
+    transformCardToAccordion('Cypress Code', cypressResponse);const id = 'CypressCode';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-success mt-2';
+    btn.innerText = 'Download Cypress ZIP';
+    btn.onclick = () => downloadCypressZip(cypressResponse);
+
+    document.getElementById(`collapse${id}`).querySelector('.accordion-body').appendChild(btn);
 }
 
 const gerarPromptUserStory = (urls, components, additionalInfo) => {
@@ -127,7 +186,7 @@ Exemplos de User Story:
 
 const gerarPromptAcceptance = (storyResponse) => {
     return `
-Com base na seguinte User Story, gere os Acceptance Criteria necessários.
+Com base na seguinte User Story, gere os Acceptance Criteria necessários. Só devem ser gerados os critérios de aceite possíveis com as urls e componentes enviados.
 
 User Story:
 ${storyResponse}
@@ -345,9 +404,20 @@ AND the next button disabled
 `;
 };
 
-const gerarPromptCypress = (storyResponse, acceptanceResponse, scenariosResponse) => {
+const gerarPromptCypress = (storyResponse, acceptanceResponse, scenariosResponse, urls, components, additionalInfo) => {
   return `
-Com base nas informações abaixo, gere um arquivo .zip contendo a pasta Cypress completa e funcional para realizar download, pronta para ser executada no projeto utilizando pageObject e DRY.
+Com base nas informações abaixo, gere a resposta em formato json da pasta Cypress completa e funcional para ser manipulado os dados e gerado botão de download, pronta para ser executada no projeto utilizando pageObject e DRY.
+
+os testes só deve usar as URLs e componentes informados abaixo, não deve usar nenhum outro seletor ou URL ou informação adicional.
+
+URLs:
+${urls.join(', ')}
+
+Componentes:
+${components.map(c => `- ${c.tipo}: ${c.seletor}`).join('\n')}
+
+Informações adicionais:
+${additionalInfo}
 
 A estrutura da pasta Cypress deve conter:
 - cypress/
@@ -359,21 +429,24 @@ A estrutura da pasta Cypress deve conter:
 A resposta deve ser em formato json, contendo o seguinte formato:
 {
   "cypress": {
-    "e2e": {
-      "specs": [
+    "e2e": [
         {
           "name": "test_spec.cy.js",
           "content": "Conteúdo do arquivo de teste"
         }
-      ]
-    },
+      ],
     "fixtures": [],
     "pages": [
         {
-          "name": "test_spec.cy.js",
+          "name": "test_spec.js",
           "content": "Conteúdo do arquivo de teste"
         }],
-    "support": []
+    "support": [
+        {
+          "name": "e2e.js",
+          "content": "Conteúdo do arquivo de comandos"
+        }
+      ]
   },
   "cypress.config.js": "Conteúdo do arquivo de configuração"
 }
