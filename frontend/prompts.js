@@ -1,5 +1,3 @@
-import { EXAMPLES_CYPRESS_TEXT } from './examples/cypress_examples.js';
-
 export const CYPRESS_EXAMPLE_SNIPPET = `
 // examples/pages/LoginPage.js
 export default class LoginPage {
