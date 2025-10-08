@@ -1,4 +1,7 @@
-const API_URL = "http://localhost:3000/generate";
+const API_URL =
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000/generate'                 // DEV
+    : 'https://qahelper.onrender.com/generate';     // PROD
 const accordionData = {};
 
 import { 
