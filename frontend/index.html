@@ -12,7 +12,33 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h1 class="mb-4">Test Generator</h1>
+        <h1 class="mb-4">QAHelper</h1>
+         <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">Como utilizar o QAHelper</h5>
+            <p>
+                O <strong>QAHelper</strong> foi desenvolvido para auxiliar na geração automática de artefatos de teste
+                com base em fluxos de comportamento. Cada <strong>comportamento</strong> da aplicação
+                deve ser descrito como um fluxo independente. Por exemplo:
+            </p>
+            <ul>
+                <li>Comportamento de <strong>login</strong> → um fluxo</li>
+                <li>Comportamento de <strong>logout</strong> → um fluxo</li>
+                <li>Comportamento de <strong>agendamento de serviço</strong> → um fluxo</li>
+                <li>Comportamento de <strong>edição de serviço agendado</strong> → um fluxo</li>
+            </ul>
+            <p>
+                Essa estrutura permite construir uma <strong>documentação de testes incremental</strong>, organizada por comportamentos.
+            </p>
+            <p>
+                Caso tenha dúvidas sobre como estruturar fluxos e histórias de usuário, recomenda-se a leitura do eBook gratuito:
+            </p>
+            <p class="mb-0">
+                📘 <a href="https://static1.squarespace.com/static/54adcd94e4b029f15b9fded5/t/63ac667d6bf7a271a8b76459/1672242814842/eBook+Histórias+de+Usuário+-+Edição+4.0+%282022%29.pdf" 
+                target="_blank" class="link-primary">
+                eBook Histórias de Usuário — Rafael Helm (Edição 4.0, 2022)
+                </a>
+            </p>
+        </div>
         <div class="mb-3">
             <h4>URLs</h4>
             <div id="urlContainer"></div>
