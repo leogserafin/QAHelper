@@ -160,7 +160,7 @@ os testes só deve usar as URLs e componentes informados abaixo, não deve usar 
 URLs:
 ${urls.join(', ')}
 
-Componentes:
+Componentes com seletores juntos, devem ser utilizados esses seletores em específico para os testes gerados sem a necessidade de alteração posterior:
 ${components.map(c => `- ${c.tipo}: ${c.seletor}`).join('\n')}
 
 Informações adicionais:

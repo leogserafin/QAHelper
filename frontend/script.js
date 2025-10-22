@@ -178,4 +178,5 @@ addComponent();
 
 window.addUrl = addUrl;
 window.addComponent = addComponent;
+window.downloadFile = downloadFile;
 window.generateTests = generateTests;
