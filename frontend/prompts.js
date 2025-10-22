@@ -161,7 +161,7 @@ URLs:
 ${urls.join(', ')}
 
 Componentes com seletores juntos, devem ser utilizados esses seletores em específico para os testes gerados sem a necessidade de alteração posterior:
-${components.map(c => `- ${c.tipo}: ${c.seletor}`).join('\n')}
+${components.map(c => `- ${c.type}: ${c.selector}`).join('\n')}
 
 Informações adicionais:
 ${additionalInfo}
