@@ -15,7 +15,7 @@ function addUrl() {
     const div = document.createElement('div');
     div.className = 'input-group mb-2';
     div.innerHTML = `<input type="text" class="form-control" placeholder="Enter URL">
-                     <button class="btn btn-danger" onclick="this.parentElement.remove()">Remove</button>`;
+                     <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover</button>`;
     document.getElementById('urlContainer').appendChild(div);
 }
 
@@ -24,7 +24,7 @@ function addComponent() {
     div.className = 'input-group mb-2';
     div.innerHTML = `<input type="text" class="form-control" placeholder="Component Type">
                      <input type="text" class="form-control" placeholder="CSS Selector">
-                     <button class="btn btn-danger" onclick="this.parentElement.remove()">Remove</button>`;
+                     <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover</button>`;
     document.getElementById('componentContainer').appendChild(div);
 }
 
