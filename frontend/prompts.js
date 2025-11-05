@@ -205,7 +205,7 @@ E a navegação para as próximas etapas deve ser bloqueada
 
 const joinUrls = (urls = []) => urls.filter(Boolean).join(', ');
 const listComponents = (components = []) =>
-  components.map(c => `- ${c.tipo}: ${c.seletor}`).join('\n');
+  components.map(c => `- ${c.type}: ${c.selector}`).join('\n');
 const safeText = (t) => (t ?? '').toString().trim();
 
 
