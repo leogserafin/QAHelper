@@ -39,20 +39,25 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### Executar o servidor backend:
 ```bash
+cd backend
 npm start
 ```
 Backend rodando em: `http://localhost:3000`
 
-### Executar o frontend:
-Método mais simples:
-- Abra `frontend/index.html` diretamente no navegador.
+### Instalar dependências do frontend:
+```bash
+cd backend
+npm install
+```
 
-Método recomendado (evitar problemas de CORS):
+### Executar o frontend:
+Para executar o front-end com um servidor local (evitando problemas de CORS), utilize:
+
 ```bash
 cd frontend
-npx http-server
+npm start
 ```
-Acesse `http://localhost:8080`
+Acesse `http://localhost:8080`, se essa porta não estiver disponível consultar qual foi a porta utilizada no terminal
 
 ## Fluxo de Funcionamento
 1. Preencha URLs, Componentes e Informações adicionais.
